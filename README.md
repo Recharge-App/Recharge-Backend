@@ -7,3 +7,4 @@ This is the backend for CougarConnect, a mobile app that helps build vibrant com
 	- [Linux](https://www.rust-lang.org/tools/install)
 	- [Windows](https://forge.rust-lang.org/infra/other-installation-methods.html)
 2. Run `cargo run` to start the server on port 8080
+3. After the first run `cargo-watch` should be installed, and you can use `cargo-watch -x 'run'` instead of `cargo run`
