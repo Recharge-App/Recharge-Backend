@@ -1,5 +1,5 @@
 [package]
-name = "Cougar-Connect-Backend"
+name = "backend"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,5 +7,6 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
+dotenv = "0.15.0"
 serde_json = "1.0"
 serde = { version = "1.0", features = ["derive"] }

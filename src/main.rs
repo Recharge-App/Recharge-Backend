@@ -1,5 +1,21 @@
-use actix_web::{body::BoxBody, http::header::ContentType, get, post, web, App, HttpRequest, HttpResponse, HttpServer, Responder};
+extern crate dotenv;
+
+use actix_web::{
+    body::BoxBody, 
+    http::header::ContentType, 
+    get, 
+    post, 
+    App, 
+    HttpRequest, 
+    HttpResponse, 
+    HttpServer, 
+    Responder
+};
+use dotenv::dotenv;
 use serde::Serialize;
+use std::{
+    env
+};
 
 
 // Routes
@@ -18,7 +34,6 @@ async fn return_json() -> impl Responder {
     MyObj { name: "user" }
 }
 
-// Response for a custom type that serializes into an `application/json` response
 #[derive(Serialize)]
 struct MyObj {
     name: &'static str,
@@ -39,13 +54,37 @@ impl Responder for MyObj {
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+
+    dotenv().ok();
+
+    let host_key: String = String::from("HOST");
+    let host: String = match env::var_os(host_key.clone()) {
+        Some(v) => v.into_string().unwrap(),
+        None => { 
+            println!("{} is not defined in .env file.", host_key.clone());
+            String::from("127.0.0.1")
+        }
+    };
+
+    let port_key: String = String::from("PORT");
+    let port: u16 = String::from(
+        match env::var_os(port_key.clone()) {
+            Some(v) => v.into_string().unwrap(),
+            None => {
+                println!("{} is not defined in .env file.", port_key.clone());
+                String::from("8080")
+            }
+        }
+    )
+    .parse().unwrap();
+
     HttpServer::new(|| {
         App::new()
             .service(hello)
             .service(echo)
             .service(return_json)
     })
-    .bind(("127.0.0.1", 8080))?
+    .bind((host, port))?
     .run()
     .await
 }
