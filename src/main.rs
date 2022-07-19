@@ -1,12 +1,13 @@
 extern crate dotenv;
 
 use actix_web::{
-    body::BoxBody, 
-    http::header::ContentType, 
-    get, 
     post, 
+    get, 
+    put,
+    delete,
+    web,
     App, 
-    HttpRequest, 
+    HttpRequest,
     HttpResponse, 
     HttpServer, 
     Responder
@@ -17,40 +18,49 @@ use std::{
     env
 };
 
-
-// Routes
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
-
-#[post("/echo")]
-async fn echo(req_body: String) -> impl Responder {
-    HttpResponse::Ok().body(req_body)
-}
-
-#[get("/json")]
-async fn return_json() -> impl Responder {
-    MyObj { name: "user" }
+#[derive(Serialize)]
+struct User {
+    user_id: u32,
+    email: String,
+    first_name: String,
+    last_name: String,
+    biography: String,
+    avatar_link: String,
+    followers: u32,
+    following: u32
 }
 
 #[derive(Serialize)]
-struct MyObj {
-    name: &'static str,
+struct Event {
+    event_id: u32,
+    user_id: u32,
+    username: String,
+    location: String,
+    description: String
 }
 
-impl Responder for MyObj {
-    type Body = BoxBody;
-
-    fn respond_to(self, _req: &HttpRequest) -> HttpResponse<Self::Body> {
-        let body = serde_json::to_string(&self).unwrap();
-
-        HttpResponse::Ok()
-            .content_type(ContentType::json())
-            .body(body)
-    }
+#[post("")]
+async fn create_user() -> impl Responder {
+    HttpResponse::Ok().body("Create user")
 }
 
+#[get("")]
+async fn get_user(req: HttpRequest) -> impl Responder {
+    let user_id: u32 = req.match_info().query("user_id").parse().unwrap();
+    println!("user_id {}", user_id);
+
+    HttpResponse::Ok().body("Get user")
+}
+
+#[put("")]
+async fn update_user() -> impl Responder {
+    HttpResponse::Ok().body("Update user")
+}
+
+#[delete("")]
+async fn delete_user() -> impl Responder {
+    HttpResponse::Ok().body("Delete User")
+}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
@@ -80,9 +90,20 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
-            .service(hello)
-            .service(echo)
-            .service(return_json)
+            .service(
+                web::scope("/api/v1")
+                    .service(
+                        web::scope("/users")
+                            .service(create_user)
+                            .service(
+                                web::scope("/{user_id}")
+                                    .service(get_user)
+                                    .service(update_user)
+                                    .service(delete_user)
+                            )
+                        // web::scope("/events")
+                    )
+            )
     })
     .bind((host, port))?
     .run()
