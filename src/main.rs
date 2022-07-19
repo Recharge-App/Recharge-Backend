@@ -47,19 +47,54 @@ async fn create_user() -> impl Responder {
 #[get("")]
 async fn get_user(req: HttpRequest) -> impl Responder {
     let user_id: u32 = req.match_info().query("user_id").parse().unwrap();
-    println!("user_id {}", user_id);
+    println!("GET user_id {}", user_id);
 
     HttpResponse::Ok().body("Get user")
 }
 
 #[put("")]
-async fn update_user() -> impl Responder {
+async fn update_user(req: HttpRequest) -> impl Responder {
+    let user_id: u32 = req.match_info().query("user_id").parse().unwrap();
+    println!("UPDATE user_id {}", user_id);
+
     HttpResponse::Ok().body("Update user")
 }
 
 #[delete("")]
-async fn delete_user() -> impl Responder {
-    HttpResponse::Ok().body("Delete User")
+async fn delete_user(req: HttpRequest) -> impl Responder {
+    let user_id: u32 = req.match_info().query("user_id").parse().unwrap();
+    println!("DELETE user_id {}", user_id);
+
+    HttpResponse::Ok().body("Delete user")
+}
+
+#[post("")]
+async fn create_event() -> impl Responder {
+    HttpResponse::Ok().body("Create user")
+}
+
+#[get("")]
+async fn get_event(req: HttpRequest) -> impl Responder {
+    let event_id: u32 = req.match_info().query("event_id").parse().unwrap();
+    println!("GET event_id {}", event_id);
+
+    HttpResponse::Ok().body("Get event")
+}
+
+#[put("")]
+async fn update_event(req: HttpRequest) -> impl Responder {
+    let event_id: u32 = req.match_info().query("event_id").parse().unwrap();
+    println!("UPDATE event_id {}", event_id);
+
+    HttpResponse::Ok().body("Update event")
+}
+
+#[delete("")]
+async fn delete_event(req: HttpRequest) -> impl Responder {
+    let event_id: u32 = req.match_info().query("event_id").parse().unwrap();
+    println!("DELETE event_id {}", event_id);
+
+    HttpResponse::Ok().body("Delete event")
 }
 
 #[actix_web::main]
@@ -101,7 +136,16 @@ async fn main() -> std::io::Result<()> {
                                     .service(update_user)
                                     .service(delete_user)
                             )
-                        // web::scope("/events")
+                    )
+                    .service(
+                        web::scope("/events")
+                            .service(create_event)
+                            .service(
+                                web::scope("/{event_id}")
+                                    .service(get_event)
+                                    .service(update_event)
+                                    .service(delete_event)
+                            )
                     )
             )
     })
